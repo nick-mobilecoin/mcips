@@ -1,17 +1,43 @@
-- Feature Name: (fill me in with a unique ident, `my_awesome_feature`)
-- Start Date: (fill me in with today's date, YYYY-MM-DD)
-- MCIP PR: [mobilecoinfoundation/mcips#0000](https://github.com/mobilecoinfoundation/mcips/pull/0000)
-- Tracking Issue: (link to tracking issue)
+- Feature Name: Protobuf Definition Files
+- Start Date: 2023-03-22
+- MCIP PR: [mobilecoinfoundation/mcips#0064](https://github.com/mobilecoinfoundation/mcips/pull/0064)
+- Tracking Issue: [mobilecoinfoundation/mobilecoin/3071](https://github.com/mobilecoinfoundation/mobilecoin/issues/3071)
 
 # Summary
 [summary]: #summary
 
-> One paragraph explanation of the feature.
+Place new [protocol buffer](https://protobuf.dev/) definition files in a
+separate repository and publish the definitions on
+<https://buf.build/mobilecoin>.
 
 # Motivation
 [motivation]: #motivation
 
-> Why are we doing this? What use cases does it support? What is the expected outcome?
+Protocol buffer definition files are often used to generate code for
+communicating with services. The defintion files define the binary data
+representation and the generated code provides a way to convert to and from a
+common code interface and the binary data representation.
+
+The current protocol buffer definitions used for communicating with fog and
+consensus are defined in the main 
+[MobileCoin repository](https://github.com/mobilecoinfoundation/mobilecoin). 
+
+Most clients end up submoduling the MobileCoin repository in order to ensure the
+correct version of the files can be used at build time to generate their code.
+The MobileCoin repository is fairly large and submoduling it to gain access to a
+few files is not very ergonomic
+
+For clients using rust they will be able to 
+Publishing the definitions on <https://buf.build> allows for clients to leverage
+Buf's capabilities to generate code from their 
+[Buf Schema Registry](https://buf.build/explore/).
+
+In the event that the client can't use the Buf Schema Registry then they can
+still submodule the smaller dedicated protocol buffer repository.
+
+hese to a separate repository,
+<https://github.com/mobilecoinfoundation/protobufs> allows clients to only
+submodule that repository if needed.
 
 # Guide-level explanation
 [guide-level-explanation]: #guide-level-explanation
