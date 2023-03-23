@@ -1,4 +1,4 @@
-- Feature Name: Protobuf Definition Files
+- Feature Name: Publishing Protobuf Definition Files
 - Start Date: 2023-03-22
 - MCIP PR: [mobilecoinfoundation/mcips#0064](https://github.com/mobilecoinfoundation/mcips/pull/0064)
 - Tracking Issue: [mobilecoinfoundation/mobilecoin/3071](https://github.com/mobilecoinfoundation/mobilecoin/issues/3071)
