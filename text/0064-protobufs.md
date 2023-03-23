@@ -6,54 +6,73 @@
 # Summary
 [summary]: #summary
 
-Place new [protocol buffer](https://protobuf.dev/) definition files in a
-separate repository and publish the definitions on
-<https://buf.build/mobilecoin>.
+A more ergonomic way for clients to use the 
+[Protobuf](https://protobuf.dev/) definition files used for communicating with
+consensus and fog services.
 
 # Motivation
 [motivation]: #motivation
 
-Protocol buffer definition files are often used to generate code for
-communicating with services. The defintion files define the binary data
-representation and the generated code provides a way to convert to and from a
-common code interface and the binary data representation.
+Protobuf definition files are often used to generate code for communicating with
+services. The Protobuf files define the binary data representation and the
+generated code provides a way to convert between common code interface and the
+binary data representation.
 
-The current protocol buffer definitions used for communicating with fog and
+The current Protobuf definitions used for communicating with fog and
 consensus are defined in the main 
-[MobileCoin repository](https://github.com/mobilecoinfoundation/mobilecoin). 
+[MobileCoin Foundation repository](https://github.com/mobilecoinfoundation/mobilecoin). 
 
-Most clients end up submoduling the MobileCoin repository in order to ensure the
-correct version of the files can be used at build time to generate their code.
-The MobileCoin repository is fairly large and submoduling it to gain access to a
-few files is not very ergonomic
+Most clients end up submoduling the MobileCoin Foundation repository in order to
+generate code at build time.  The MobileCoin Foundation repository is fairly
+large and submoduling it to gain access to a few files is not very ergonomic.
 
-For clients using rust they will be able to 
-Publishing the definitions on <https://buf.build> allows for clients to leverage
-Buf's capabilities to generate code from their 
-[Buf Schema Registry](https://buf.build/explore/).
-
-In the event that the client can't use the Buf Schema Registry then they can
-still submodule the smaller dedicated protocol buffer repository.
-
-hese to a separate repository,
-<https://github.com/mobilecoinfoundation/protobufs> allows clients to only
-submodule that repository if needed.
+There are better ways to make the Protobuf files available for clients to use.
 
 # Guide-level explanation
 [guide-level-explanation]: #guide-level-explanation
 
-> Explain the proposal as if it was already included in the system and you were teaching it to a user. That generally means:
->
-> - Introducing new named concepts
-> - Explaining the feature largely in terms of examples.
-> - Explaining how users should *think* about the feature, and how it should impact the way they use MobileCoin. It should explain the impact as concretely as possible.
-> - If applicable, provide sample error messages, deprecation warnings, or migration guidance.
-> - If applicable, describe the differences between teaching this to existing users and new users.
->
-> For implementation-oriented MCIPs (e.g. for ledger formats), this section should focus on how other contributors should think about the change, and give examples of its concrete impact. For policy MCIPs, this section should provide an example-driven introduction to the policy, and explain its impact in concrete terms.
+Protobuf definition files are made available in the following ways:
+
+1. [Buf Schema Registry](#buf-schema-registry)
+2. [Rust crates](#rust-crates)
+3. [The Protobuf git repo](#the-protobuf-git-repo)
+
+## Buf Schema Registry
+
+The [Buf Schema Registry](https://buf.build/explore/) is an online hosting
+platform of of Protobuf defintions. It provides documentation hosting and a
+command line tool that can be used to generated code and detect breaking changes
+in Protobuf definitions.
+
+The MobileCoin Founation Protobuf files are available at
+<https://buf.build/mobilecoinfoundation>.
+
+For clients using a language supported by the Buf Schema Registry, it is the
+suggested way to use the MobileCoin Foundation's Protobufs 
+
+## Rust Crates
+
+The MobileCoin Foundation Protobuf defintions are available via
+[Rust](https://www.rust-lang.org/) crates.  These crates can be found on
+<https://crates.io> by searching for
+[mc-protobuf-](https://crates.io/search?q=mc-protobuf-).
+
+Building using the crates requires the client to have
+[protoc](https://grpc.io/docs/protoc-installation/), the Protocol Buffer
+Compiler, installed.
+
+## The Protobuf Git Repo
+
+Clients can directly access the Protobuf definitions via the git repo,
+<https://github.com/mobilecoinfoundation/protobufs>. 
+
+The other two methods should be prefered over direct access to the git repo, but
+there are times where it is necessary.
 
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
+
+
 
 > This is the technical portion of the MCIP. Explain the design in sufficient detail that:
 >
