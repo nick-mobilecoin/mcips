@@ -15,18 +15,16 @@ consensus and fog services.
 
 Protobuf definition files are often used to generate code for communicating with
 services. The Protobuf files define the binary data representation and the
-generated code provides a way to convert between common code interface and the
+generated code provides a way to convert between a common code interface and the
 binary data representation.
 
-The current Protobuf definitions used for communicating with fog and
-consensus are defined in the main 
-[MobileCoin Foundation repository](https://github.com/mobilecoinfoundation/mobilecoin). 
+The current Protobuf definitions for communicating with fog and consensus are
+defined in the main 
+MobileCoin Foundation git [repo](https://github.com/mobilecoinfoundation/mobilecoin). 
 
-Most clients end up submoduling the MobileCoin Foundation repository in order to
-generate code at build time.  The MobileCoin Foundation repository is fairly
+Most clients end up submoduling the MobileCoin Foundation repo in order to
+generate code at build time.  The MobileCoin Foundation repo is fairly
 large and submoduling it to gain access to a few files is not very ergonomic.
-
-There are better ways to make the Protobuf files available for clients to use.
 
 # Guide-level explanation
 [guide-level-explanation]: #guide-level-explanation
@@ -40,26 +38,39 @@ Protobuf definition files are made available in the following ways:
 ## Buf Schema Registry
 
 The [Buf Schema Registry](https://buf.build/explore/) is an online hosting
-platform of of Protobuf defintions. It provides documentation hosting and a
-command line tool that can be used to generated code and detect breaking changes
-in Protobuf definitions.
+platform of Protobuf defintions. It provides documentation hosting and a command
+line tool to detect breaking changes in Protobuf definitions.
 
-The MobileCoin Founation Protobuf files are available at
+The MobileCoin Foundation Protobuf files are available at
 <https://buf.build/mobilecoinfoundation>.
 
-For clients using a language supported by the Buf Schema Registry, it is the
-suggested way to use the MobileCoin Foundation's Protobufs 
+
+For most clients, the Buf Schema Registry is the recommended way to use the
+MobileCoin Foundation's Protobufs.
 
 ## Rust Crates
 
 The MobileCoin Foundation Protobuf defintions are available via
-[Rust](https://www.rust-lang.org/) crates.  These crates can be found on
-<https://crates.io> by searching for
-[mc-protobuf-](https://crates.io/search?q=mc-protobuf-).
+[Rust](https://www.rust-lang.org/) crates.  The crates use
+[prost](https://docs.rs/prost/latest/prost/) generated messages. Both
+[tonic](https://docs.rs/tonic/latest/tonic/) and
+[grpcio](https://docs.rs/grpcio/latest/grpcio/) are supported for the services.
 
-Building using the crates requires the client to have
-[protoc](https://grpc.io/docs/protoc-installation/), the Protocol Buffer
-Compiler, installed.
+
+These crates can be found on
+<https://crates.io> by searching for one of the following:
+
+- [mc-*-grpcio](https://crates.io/search?q=mc-*-grpcio) for rust
+  [grpcio](https://docs.rs/grpcio/latest/grpcio/) services.
+- [mc-*-messages](https://crates.io/search?q=mc-*-messages) for
+  [prost](https://docs.rs/prost/latest/prost/) messages.
+- [mc-*-tonic](https://crates.io/search?q=mc-*-tonic) for
+  [tonic](https://docs.rs/tonic/latest/tonic/) services.
+
+Building the crates requires the client to have the Protocol Buffer Compiler,
+[protoc](https://grpc.io/docs/protoc-installation/), installed.
+
+For rust projects, the rust crates are the recommended way of using the MobileCoin Foundatin Protobuf defintions.
 
 ## The Protobuf Git Repo
 
@@ -67,74 +78,121 @@ Clients can directly access the Protobuf definitions via the git repo,
 <https://github.com/mobilecoinfoundation/protobufs>. 
 
 The other two methods should be prefered over direct access to the git repo, but
-there are times where it is necessary.
+there are times when it is necessary to use the repo directly.
 
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
 
+The MobileCoin Foundation Protobuf defintions are located at
+<https://github.com/mobilecoinfoundation/protobufs>. When a series of git
+changes are deemed ready to release, the new versions will be published to
+<https://buf.build/mobilecoinfoundation> and crates published to <https://crates.io>. 
 
+The Protobuf messages are placed in separate files from the Protobuf services.
+This makes it easier for one to build just the message types without needing to
+worry about the service implementation.
 
-> This is the technical portion of the MCIP. Explain the design in sufficient detail that:
->
-> - Its interaction with other features is clear.
-> - It is reasonably clear how the feature would be implemented.
-> - Corner cases are dissected by example.
->
-> The section should return to the examples given in the previous section, and explain more fully how the detailed proposal makes those examples work.
+Each Protobuf API will be placed in it's own directory with the
+following layout:
+
+```console
+mobilecoinfoundation
+└── <name of api>
+    ├── grpcio
+    │   ├── build.rs
+    │   ├── Cargo.toml
+    │   ├── protos
+    │   │   └── services.proto (Symlink to <version>/services.proto)
+    │   ├── README.md
+    │   └── src
+    │       └── lib.rs
+    ├── messages
+    │   ├── build.rs
+    │   ├── Cargo.toml
+    │   ├── protos
+    │   │   └── messages.proto (Symlink to <version>/messages.proto)
+    │   ├── README.md
+    │   └── src
+    │       └── lib.rs
+    ├── tonic
+    │   ├── build.rs
+    │   ├── Cargo.toml
+    │   ├── protos
+    │   │   └── services.proto (Symlink to <version>/services.proto)
+    │   ├── README.md
+    │   └── src
+    │       └── lib.rs
+    └── <version> (of the form `v1`, `v2`, etc.)
+        ├── messages.proto
+        └── services.proto
+```
+
+The `<name of api>` is used to separate different Protobuf APIs. For example
+this might be `attestatoin` to define only the attestation Protobuf API.
+
+The `grpcio` directory holds the files to build the rust crate
+`mc-<name-of-api>-grpcio`. This rust crate is for building the services that
+work with [rust grpcio](https://docs.rs/grpcio/latest/grpcio/).
+
+The `messages` directory holds the files to build the rust crate
+`mc-<name-of-api>-messages`. This rust crate is for building the
+[prost](https://docs.rs/prost/latest/prost/) messages. 
+
+The `tonic` directory holds the files to build the rust crate
+`mc-<name-of-api>-tonic`. This rust crate is for building the services that work
+with [tonic](https://docs.rs/tonic/latest/tonic/). 
+
+The `<version>` directory is used to isolate breaking changes to the Protobuf
+API. All updates to `v1` should continue to work with the first published
+release of `v1`. If a breaking change is necessary it should be made in a
+subsequent `v2` directory.
+
+Symlinks are used from the rust crates back to the `<version>` directory to
+ensure that the rust crates build on <https://crates.io>.
 
 # Drawbacks
 [drawbacks]: #drawbacks
 
-> Why should we *not* do this?
+- Using the Buf Schema Registry puts reliance on a third party. It is currently
+  listed as "in beta", meaning it may have changes coming that we may need to
+  account for as time progresses. 
+
+- Housing the rust crates in the Protobuf repo may encourage housing other
+  language versions in the repo.
+
+- Separaing the Protobuf definitions from the main repo can make it less
+  ergonomic to develop newer APIs. Developers may need to temporarily redirect
+  crate dependencies to current inflight API changes.
 
 # Rationale and alternatives
 [rationale-and-alternatives]: #rationale-and-alternatives
 
-> - Why is this design the best in the space of possible designs?
-> - What other designs have been considered and what is the rationale for not choosing them?
-> - What is the impact of not doing this?
+Publishing the Protobuf API definitions makes it easier for other code bases to
+communicate with Consensus and Fog. Regardless of which language is used,
+clients can generate code to communicate using the API without having to find
+the files in the MobileCoin Foundation repo.
+
+The Protobuf APIs can be versioned independent of the Consensus and Fog
+releases. This makes it easier for a client to see when pertenent changes
+occur.
+
+Having a dedicated repo makes it easier to have CI checks to prevent breaking
+changes to the Protobuf APIs.  Currently it is left to the developers to ensure
+changes are non breaking. The main MobileCoin Foundation repo already has quite
+a lot of CI steps adding another step for Protobuf breaking changes is likely to
+fall to the wayside.
 
 # Prior art
 [prior-art]: #prior-art
 
-> Discuss prior art, both the good and the bad, in relation to this proposal.
-> A few examples of what this can include are:
->
-> - For consensus and fog proposals: Does this feature exist in other systems, and what experience have their community had?
-> - For community proposals: Is this done by some other community and what were their experiences with it?
-> - For other teams: What lessons can we learn from what other communities have done here?
-> - Papers: Are there any published papers or great posts that discuss this? If you have some relevant papers to refer to, this can serve as a more detailed theoretical background.
->
-> This section is intended to encourage you as an author to think about the lessons from other systems, provide readers of your MCIP with a fuller picture.
-> If there is no prior art, that is fine - your ideas are interesting to us whether they are brand new or if it is an adaptation from other systems.
->
-> Note that while precedent set by other systems is some motivation, it does not on its own motivate an MCIP.
-> Please also take into consideration that MobileCoin sometimes intentionally diverges from common cryptocurrency features.
+None
 
 # Unresolved questions
 [unresolved-questions]: #unresolved-questions
 
-> - What parts of the design do you expect to resolve through the MCIP process before this gets merged?
-> - What parts of the design do you expect to resolve through the implementation of this feature before stabilization?
-> - What related issues do you consider out of scope for this MCIP that could be addressed in the future independently of the solution that comes out of this MCIP?
+- How do we version the published crates?
 
 # Future possibilities
 [future-possibilities]: #future-possibilities
 
-> Think about what the natural extension and evolution of your proposal would
-> be and how it would affect the project as a whole in a holistic way. Try to
-> use this section as a tool to more fully consider all possible interactions
-> with aspects of the project in your proposal. Also consider how this all
-> fits into the roadmap for the project and of the relevant team.
->
-> This is also a good place to "dump ideas", if they are out of scope for the
-> MCIP you are writing but otherwise related.
->
-> If you have tried and cannot think of any future possibilities,
-> you may simply state that you cannot think of anything.
->
-> Note that having something written down in the future-possibilities section
-> is not a reason to accept the current or a future MCIP; such notes should be
-> in the section on motivation or rationale in this or subsequent MCIPs.
-> The section merely provides additional information.
-
+Unknown
